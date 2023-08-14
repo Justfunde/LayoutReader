@@ -19,13 +19,23 @@ Test__MskReader()
 
    constexpr std::string_view fileName = TEST_FILES_DIR "carryCell.MSK";
 
-   LayoutData  layout;
+   LayoutData layout;
 
    LayoutReader* p_reader = GetReader(std::wstring(fileName.begin(), fileName.end()));
-   TEST_ASSERT(p_reader, nullptr, ==);
-   TEST_ASSERT(p_reader->Read(&layout), false, ==)
+   p_reader->Read(&layout)
    FreeReader(p_reader);
+   TEST_ASSERT(p_reader, nullptr, ==);
+   TEST_ASSERT(, false, ==)
+   
 
+   switch(layout.libraries[0]->layers[0].geometries[0]->type)
+   {
+      case GeometryType::polygon:
+      {
+         auto poly = static_cast<Polygon*>(layout.libraries[0]->layers[0].geometries[0]);
+         poly->
+      } 
+   }
    TEST_ASSERT(layout.libraries.size(),libraryCntEtalon,!=)
    TEST_ASSERT(layout.libraries[0]->elements.size(), elementCntEtalon, !=);
    for(auto it:layout.libraries[0]->layers)
