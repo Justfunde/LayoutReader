@@ -11,14 +11,14 @@
 #include "GDSIITypes.hpp"
 
 class LayoutReader_GDSIIbin : public LayoutReader {
-  Library      *p_activeLibrary;
-  Element      *p_activeElement;
-  Geometry     *p_activeGeometry;
+  lds::Library      *p_activeLibrary;
+  lds::Element      *p_activeElement;
+  lds::Geometry     *p_activeGeometry;
 public:
   LayoutReader_GDSIIbin();
 public:
   bool IsMyFormat(const std::wstring &fName) final;
-  bool Read(LayoutData *layout) final;
+  bool Read(lds::LayoutData *layout) final;
 private:
   void ReadSection_HEADER(GDSIIRecord &_GDSIIRecord);
   void ReadSection_BEGINLIBRARY(GDSIIRecord &_GDSIIRecord);
@@ -84,7 +84,7 @@ private:
   void ApplyLayoutReaderOptionsToActiveElement();
   bool PostProcessLayout();
 private:
-  bool ResolveStructureReference(Reference* p_reference);
+  bool ResolveStructureReference(lds::Reference* p_reference);
   bool EnumerateLayers();
   void EvaluateBoundingBox();
 };

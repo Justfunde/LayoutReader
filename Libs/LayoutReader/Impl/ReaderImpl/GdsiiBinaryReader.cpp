@@ -47,7 +47,7 @@ bool LayoutReader_GDSIIbin::IsMyFormat(const std::wstring &fName) {
   return true;
 }
 
-bool LayoutReader_GDSIIbin::Read(LayoutData *layout) {
+bool LayoutReader_GDSIIbin::Read(lds::LayoutData *layout) {
   if (!p_data)
     return false;
   p_data = layout;
@@ -134,7 +134,7 @@ bool LayoutReader_GDSIIbin::Read(LayoutData *layout) {
   file .close();
   //std::clock_t stopReading = std::clock();
   layout->fileName    = fileName;
-  layout->fileFormat  = LayoutFileFormat::GDSII_bin;
+  layout->fileFormat  = lds::LayoutFileFormat::GDSII_bin;
   return PostProcessLayout();
 }
 
@@ -150,7 +150,7 @@ void LayoutReader_GDSIIbin::ReadSection_BEGINLIBRARY(GDSIIRecord &_record) {
     //TODO: push error, library already started
     return;
   }
-  p_activeLibrary = new Library;
+  p_activeLibrary = new lds::Library;
   p_data->libraries.push_back(p_activeLibrary);
 
   DateTime lastTimeModified, lastTimeAccessed;
@@ -208,7 +208,7 @@ void LayoutReader_GDSIIbin::ReadSection_UNITS(GDSIIRecord &_record) {
     return;
   }
 
-  file.read(reinterpret_cast<char *>(&p_activeLibrary->units), sizeof(Units));
+  file.read(reinterpret_cast<char *>(&p_activeLibrary->units), sizeof(lds::Units));
 
   Normalize_DOUBLE(p_activeLibrary->units.user);
   Normalize_DOUBLE(p_activeLibrary->units.physical);
@@ -235,7 +235,7 @@ void LayoutReader_GDSIIbin::ReadSection_BEGINSTRUCTURE(GDSIIRecord &_record) {
     return;
   }
 
-  p_activeElement = new Element;
+  p_activeElement = new lds::Element;
 
   DateTime lastTimeModified, lastTimeAccessed;
   file.read(reinterpret_cast<char *>(&lastTimeModified), sizeof(DateTime));
@@ -325,7 +325,7 @@ void LayoutReader_GDSIIbin::ReadSection_BOUNDARY(GDSIIRecord &_record) {
     return;
   }
 
-  p_activeGeometry = new Polygon;
+  p_activeGeometry = new lds::Polygon;
   p_activeElement->geometries.push_back(p_activeGeometry);
 }
 
@@ -343,7 +343,7 @@ void LayoutReader_GDSIIbin::ReadSection_PATH(GDSIIRecord &_record) {
     return;
   }
 
-  p_activeGeometry = new Path;
+  p_activeGeometry = new lds::Path;
   p_activeElement->geometries.push_back(p_activeGeometry);
 }
 
@@ -361,7 +361,7 @@ void LayoutReader_GDSIIbin::ReadSection_SREF(GDSIIRecord &_record) {
     return;
   }
 
-  p_activeGeometry = new Reference;
+  p_activeGeometry = new lds::Reference;
   p_activeElement->geometries.push_back(p_activeGeometry);
   p_activeElement->isFlat = false;
 }
@@ -382,7 +382,7 @@ void LayoutReader_GDSIIbin::ReadSection_TEXT(GDSIIRecord &_record) {
     return;
   }
 
-  p_activeGeometry = new Text;
+  p_activeGeometry = new lds::Text;
   p_activeElement->geometries.push_back(p_activeGeometry);
 }
 
@@ -423,11 +423,11 @@ void LayoutReader_GDSIIbin::ReadSection_DATATYPE(GDSIIRecord &_record) {
   Normalize_WORD(dataType);
 
   switch (p_activeGeometry->type) {
-    case GeometryType::polygon:
-      static_cast<Polygon *>(p_activeGeometry)->dataType = dataType;
+    case lds::GeometryType::polygon:
+      static_cast<lds::Polygon *>(p_activeGeometry)->dataType = dataType;
       break;
-    case GeometryType::path:
-      static_cast<Path *>(p_activeGeometry)->dataType = dataType;
+    case lds::GeometryType::path:
+      static_cast<lds::Path *>(p_activeGeometry)->dataType = dataType;
       break;
     default:
       ;
@@ -454,11 +454,11 @@ void LayoutReader_GDSIIbin::ReadSection_WIDTH(GDSIIRecord &_record) {
   Normalize_DWORD(width);
 
   switch (p_activeGeometry->type) {
-    case GeometryType::path:
-      static_cast<Path *>(p_activeGeometry)->width = width;
+    case lds::GeometryType::path:
+      static_cast<lds::Path *>(p_activeGeometry)->width = width;
       break;
-    case GeometryType::text:
-      static_cast<Text *>(p_activeGeometry)->width = width;
+    case lds::GeometryType::text:
+      static_cast<lds::Text *>(p_activeGeometry)->width = width;
       break;
     default:
       ;
@@ -480,22 +480,22 @@ void LayoutReader_GDSIIbin::ReadSection_XY(GDSIIRecord &_record) {
     return;
   }
 
-  int numberOfCoors = _record.length / sizeof(Coord);
+  int numberOfCoors = _record.length / sizeof(lds::Coord);
 
-  Polygon    *p_boundary = nullptr;
-  Path       *p_path = nullptr;
-  Rectangle  *p_box = nullptr;
-  Reference  *p_structRef = nullptr;
-  Text       *p_text = nullptr;
-  Coord       coord;
+  lds::Polygon    *p_boundary = nullptr;
+  lds::Path       *p_path = nullptr;
+  lds::Rectangle  *p_box = nullptr;
+  lds::Reference  *p_structRef = nullptr;
+  lds::Text       *p_text = nullptr;
+  lds::Coord       coord;
   int         i = 0;
 
   switch (p_activeGeometry->type) {
-    case GeometryType::polygon:
-      p_boundary = static_cast<Polygon *>(p_activeGeometry);
+    case lds::GeometryType::polygon:
+      p_boundary = static_cast<lds::Polygon *>(p_activeGeometry);
       p_boundary->coords.resize(numberOfCoors);
       for (i = 0; i < numberOfCoors; ++i) {
-        file.read(reinterpret_cast<char *>(&coord), sizeof(Coord));
+        file.read(reinterpret_cast<char *>(&coord), sizeof(lds::Coord));
 
         Normalize_DWORD(coord.x);
         Normalize_DWORD(coord.y);
@@ -503,11 +503,11 @@ void LayoutReader_GDSIIbin::ReadSection_XY(GDSIIRecord &_record) {
         p_boundary->coords[i] = coord;
       }
       break;
-    case GeometryType::path:
-      p_path = static_cast<Path *>(p_activeGeometry);
+    case lds::GeometryType::path:
+      p_path = static_cast<lds::Path *>(p_activeGeometry);
       p_path->coords.resize(numberOfCoors);
       for (i = 0; i < numberOfCoors; ++i) {
-        file.read(reinterpret_cast<char *>(&coord), sizeof(Coord));
+        file.read(reinterpret_cast<char *>(&coord), sizeof(lds::Coord));
 
         Normalize_DWORD(coord.x);
         Normalize_DWORD(coord.y);
@@ -515,11 +515,11 @@ void LayoutReader_GDSIIbin::ReadSection_XY(GDSIIRecord &_record) {
         p_path->coords[i] = coord;
       }
       break;
-    case GeometryType::rectangle:
-      p_box = static_cast<Rectangle *>(p_activeGeometry);
+    case lds::GeometryType::rectangle:
+      p_box = static_cast<lds::Rectangle *>(p_activeGeometry);
       p_box->coords.resize(numberOfCoors);
       for (i = 0; i < numberOfCoors; ++i) {
-        file.read(reinterpret_cast<char *>(&coord), sizeof(Coord));
+        file.read(reinterpret_cast<char *>(&coord), sizeof(lds::Coord));
 
         Normalize_DWORD(coord.x);
         Normalize_DWORD(coord.y);
@@ -527,19 +527,19 @@ void LayoutReader_GDSIIbin::ReadSection_XY(GDSIIRecord &_record) {
         p_box->coords[i] = coord;
       }
       break;
-    case GeometryType::reference:
-      p_structRef = static_cast<Reference *>(p_activeGeometry);
+    case lds::GeometryType::reference:
+      p_structRef = static_cast<lds::Reference *>(p_activeGeometry);
 
-      file.read(reinterpret_cast<char *>(&coord), sizeof(Coord));
+      file.read(reinterpret_cast<char *>(&coord), sizeof(lds::Coord));
       Normalize_DWORD(coord.x);
       Normalize_DWORD(coord.y);
 
       p_structRef->coords.push_back(coord);
       break;
-    case GeometryType::text:
-      p_text = static_cast<Text *>(p_activeGeometry);
+    case lds::GeometryType::text:
+      p_text = static_cast<lds::Text *>(p_activeGeometry);
 
-      file.read(reinterpret_cast<char *>(&coord), sizeof(Coord));
+      file.read(reinterpret_cast<char *>(&coord), sizeof(lds::Coord));
       Normalize_DWORD(coord.x);
       Normalize_DWORD(coord.y);
 
@@ -596,7 +596,7 @@ void LayoutReader_GDSIIbin::ReadSection_SNAME(GDSIIRecord &_record) {
     //MessageManager::Get()->PushError("Format error. Found SNAME section outside of element.");
     return;
   }
-  if (p_activeGeometry->type != GeometryType::reference) {
+  if (p_activeGeometry->type != lds::GeometryType::reference) {
     //MessageManager::Get()->PushError("Format error. Found SNAME section given for inproper type of element.");
     return;
   }
@@ -604,7 +604,7 @@ void LayoutReader_GDSIIbin::ReadSection_SNAME(GDSIIRecord &_record) {
   char *str = new char[_record.length + 1];
   memset(str, 0, _record.length + 1);
   file.read(str, _record.length);
-  static_cast<Reference *>(p_activeGeometry)->name = str;
+  static_cast<lds::Reference *>(p_activeGeometry)->name = str;
   delete[] str;
   str = nullptr;
 }
@@ -626,7 +626,7 @@ void LayoutReader_GDSIIbin::ReadSection_TEXTTYPE(GDSIIRecord &_record) {
     //MessageManager::Get()->PushError("Format error. Found TEXTTYPE section outside of element.");
     return;
   }
-  if (p_activeGeometry->type != GeometryType::text) {
+  if (p_activeGeometry->type != lds::GeometryType::text) {
     //MessageManager::Get()->PushError("Format error. Found TEXTTYPE section given for inproper type of element.");
     return;
   }
@@ -635,7 +635,7 @@ void LayoutReader_GDSIIbin::ReadSection_TEXTTYPE(GDSIIRecord &_record) {
   file.read(reinterpret_cast<char *>(&type), sizeof(int16_t));
   Normalize_WORD(type);
 
-  static_cast<Text *>(p_activeGeometry)->textType = type;
+  static_cast<lds::Text *>(p_activeGeometry)->textType = type;
 }
 
 void LayoutReader_GDSIIbin::ReadSection_PRESENTATION(GDSIIRecord &_record) {
@@ -651,7 +651,7 @@ void LayoutReader_GDSIIbin::ReadSection_PRESENTATION(GDSIIRecord &_record) {
     //MessageManager::Get()->PushError("Format error. Found PRESENTATION section outside of element.");
     return;
   }
-  if (p_activeGeometry->type != GeometryType::text) {
+  if (p_activeGeometry->type != lds::GeometryType::text) {
     //MessageManager::Get()->PushError("Format error. Found PRESENTATION section given for inproper type of element.");
     return;
   }
@@ -660,7 +660,7 @@ void LayoutReader_GDSIIbin::ReadSection_PRESENTATION(GDSIIRecord &_record) {
   file.read(reinterpret_cast<char *>(&flags), sizeof(int16_t));
   Normalize_WORD(flags);
 
-  static_cast<Text *>(p_activeGeometry)->flagsPresentation = flags;
+  static_cast<lds::Text *>(p_activeGeometry)->flagsPresentation = flags;
 }
 
 // UNUSED
@@ -678,7 +678,7 @@ void LayoutReader_GDSIIbin::ReadSection_STRING(GDSIIRecord &_record) {
     //MessageManager::Get()->PushError("Format error. Found STRING section outside of element.");
     return;
   }
-  if (p_activeGeometry->type != GeometryType::text) {
+  if (p_activeGeometry->type != lds::GeometryType::text) {
     //MessageManager::Get()->PushError("Format error. Found STRING section given for inproper type of element.");
     return;
   }
@@ -686,7 +686,7 @@ void LayoutReader_GDSIIbin::ReadSection_STRING(GDSIIRecord &_record) {
   char *str = new char[_record.length + 1];
   memset(str, 0, _record.length + 1);
   file.read(str, _record.length);
-  static_cast<Text *>(p_activeGeometry)->stringValue = str;
+  static_cast<lds::Text *>(p_activeGeometry)->stringValue = str;
   delete[] str;
   str = nullptr;
 }
@@ -710,14 +710,14 @@ void LayoutReader_GDSIIbin::ReadSection_STRANS(GDSIIRecord &_record) {
   Normalize_WORD(flags);
 
   switch (p_activeGeometry->type) {
-    case GeometryType::reference:
+    case lds::GeometryType::reference:
       //static_cast<GDSII_StructureRef *>(p_activeGeometry)-> = flags;
       break;
     //case it_arrayRef:
       //static_cast<GDSII_ArrayRef *>(p_activeGeometry)-> = flags;
       //break;
-    case GeometryType::text:
-      static_cast<Text *>(p_activeGeometry)->flagsTransformation = flags;
+    case lds::GeometryType::text:
+      static_cast<lds::Text *>(p_activeGeometry)->flagsTransformation = flags;
       break;
     default:
       ;
@@ -744,14 +744,14 @@ void LayoutReader_GDSIIbin::ReadSection_MAG(GDSIIRecord &_record) {
   Normalize_DOUBLE(mag);
 
   switch (p_activeGeometry->type) {
-    case GeometryType::reference:
-      static_cast<Reference *>(p_activeGeometry)->magnification = mag;
+    case lds::GeometryType::reference:
+      static_cast<lds::Reference *>(p_activeGeometry)->magnification = mag;
       break;
     //case et_arrayRef:
       //static_cast<GDSII_ArrayRef *>(p_activeGeometry)->magnification = mag;
       //break;
-    case GeometryType::text:
-      static_cast<Text *>(p_activeGeometry)->magnification = mag;
+    case lds::GeometryType::text:
+      static_cast<lds::Text *>(p_activeGeometry)->magnification = mag;
       break;
     default:
       ;
@@ -784,11 +784,11 @@ void LayoutReader_GDSIIbin::ReadSection_PATHTYPE(GDSIIRecord &_record) {
   Normalize_WORD(type);
 
   switch (p_activeGeometry->type) {
-    case GeometryType::path:
-      static_cast<Path *>(p_activeGeometry)->pathType = type;
+    case lds::GeometryType::path:
+      static_cast<lds::Path *>(p_activeGeometry)->pathType = type;
       break;
-    case GeometryType::text:
-      static_cast<Text *>(p_activeGeometry)->pathType = type;
+    case lds::GeometryType::text:
+      static_cast<lds::Text *>(p_activeGeometry)->pathType = type;
       break;
     default:
       ;
@@ -824,7 +824,7 @@ void LayoutReader_GDSIIbin::ReadSection_PROPATTR(GDSIIRecord &_record) {
     return;
   }
 
-  Property prop = { 0, "" };
+  lds::Property prop = { 0, "" };
   file.read(reinterpret_cast<char *>(&prop.index), sizeof(int16_t));
   Normalize_WORD(prop.index);
 
@@ -874,7 +874,7 @@ void LayoutReader_GDSIIbin::ReadSection_BOX(GDSIIRecord &_record) {
     return;
   }
 
-  p_activeGeometry = new Rectangle;
+  p_activeGeometry = new lds::Rectangle;
   p_activeElement->geometries.push_back(p_activeGeometry);
 }
 
@@ -891,7 +891,7 @@ void LayoutReader_GDSIIbin::ReadSection_BOXTYPE(GDSIIRecord &_record) {
     //MessageManager::Get()->PushError("Format error. Found BOXTYPE section outside of element.");
     return;
   }
-  if (p_activeGeometry->type != GeometryType::rectangle) {
+  if (p_activeGeometry->type != lds::GeometryType::rectangle) {
     //MessageManager::Get()->PushError("Format error. Found BOXTYPE section given for wrong type of element.");
     return;
   }
@@ -900,7 +900,7 @@ void LayoutReader_GDSIIbin::ReadSection_BOXTYPE(GDSIIRecord &_record) {
   file.read(reinterpret_cast<char *>(&type), sizeof(int16_t));
   Normalize_WORD(type);
 
-  static_cast<Rectangle *>(p_activeGeometry)->rectType = type;
+  static_cast<lds::Rectangle *>(p_activeGeometry)->rectType = type;
 }
 
 //void LayoutReader_GDSIIbin::ReadSection_PLEX(GDSIIRecord &_record) {}
@@ -923,9 +923,9 @@ bool LayoutReader_GDSIIbin::PostProcessLayout() {
   for (size_t i = 0; i < p_data->libraries.size(); ++i)
     for (size_t j = 0; j < p_data->libraries[i]->elements.size(); ++j)
       for (size_t k = 0; k < p_data->libraries[i]->elements[j]->geometries.size(); ++k) {
-        if (p_data->libraries[i]->elements[j]->geometries[k]->type != GeometryType::reference)
+        if (p_data->libraries[i]->elements[j]->geometries[k]->type != lds::GeometryType::reference)
           continue;
-        if (!ResolveStructureReference(static_cast<Reference*>(p_data->libraries[i]->elements[j]->geometries[k])))
+        if (!ResolveStructureReference(static_cast<lds::Reference*>(p_data->libraries[i]->elements[j]->geometries[k])))
           return false;
       }
 
@@ -939,7 +939,7 @@ bool LayoutReader_GDSIIbin::PostProcessLayout() {
   return true;
 }
 
-bool LayoutReader_GDSIIbin::ResolveStructureReference(Reference* p_reference) {
+bool LayoutReader_GDSIIbin::ResolveStructureReference(lds::Reference* p_reference) {
   for (size_t i = 0; i < p_data->libraries.size(); ++i)
     for (size_t j = 0; j < p_data->libraries[i]->elements.size(); ++j) {
       if (p_data->libraries[i]->elements[j]->name == p_reference->name) {
@@ -952,22 +952,22 @@ bool LayoutReader_GDSIIbin::ResolveStructureReference(Reference* p_reference) {
 }
 
 bool LayoutReader_GDSIIbin::EnumerateLayers() {
-  Library *p_lib = nullptr;
+  lds::Library *p_lib = nullptr;
   for (size_t i = 0; i < p_data->libraries.size(); ++i) {
     p_lib = p_data->libraries[i];
     for (size_t j = 0; j < p_lib->elements.size(); ++j) {
       for (size_t k = 0; k < p_lib->elements[j]->geometries.size(); ++k) {
-        if (p_lib->elements[j]->geometries[k]->type == GeometryType::reference)
+        if (p_lib->elements[j]->geometries[k]->type == lds::GeometryType::reference)
           continue;
         int layer = p_lib->elements[j]->geometries[k]->layer;
         int dtype = 0;
 
         switch (p_lib->elements[j]->geometries[k]->type) {
-          case GeometryType::polygon:
-            dtype = static_cast<Polygon *>(p_lib->elements[j]->geometries[k])->dataType;
+          case lds::GeometryType::polygon:
+            dtype = static_cast<lds::Polygon *>(p_lib->elements[j]->geometries[k])->dataType;
             break;
-          case GeometryType::path:
-            dtype = static_cast<Path *>(p_lib->elements[j]->geometries[k])->dataType;
+          case lds::GeometryType::path:
+            dtype = static_cast<lds::Path *>(p_lib->elements[j]->geometries[k])->dataType;
             break;
         }
 
@@ -979,7 +979,7 @@ bool LayoutReader_GDSIIbin::EnumerateLayers() {
           }
         if (l < p_lib->layers.size())
           continue;
-        Layer li;
+        lds::Layer li;
         li.layer = layer;
         li.dataType = dtype;
         //li.geometries.push_back(p_lib->elements[j]->geometries[k]);
@@ -1004,7 +1004,7 @@ bool LayoutReader_GDSIIbin::EnumerateLayers() {
 }
 
 void LayoutReader_GDSIIbin::EvaluateBoundingBox() {
-  Library* p_lib = nullptr;
+  lds::Library* p_lib = nullptr;
   for (size_t i = 0; i < p_data->libraries.size(); ++i) {
     p_lib = p_data->libraries[i];
 

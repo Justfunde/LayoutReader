@@ -17,15 +17,19 @@ set(OUTPUT_RELEASE_DIR "${CMAKE_CURRENT_LIST_DIR}/Release")
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules")
 set(PROJECT_DIR ${CMAKE_CURRENT_LIST_DIR})
 
-find_package(Boost REQUIRED)
+set (CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} "D:\\qt\\5.12.12\\mingw73_64\\")
 
-if(Boost_FOUND)
-    include_directories(${Boost_INCLUDE_DIRS})
-endif()
+# find_package(Boost REQUIRED)
+find_package(Qt5 COMPONENTS Core Gui Widgets REQUIRED)
+
+# if(Boost_FOUND)
+#     include_directories(${Boost_INCLUDE_DIRS})
+# endif()
 
 
 include(UnitTestModule)
 include(CTest)
 
+set(SHARED_INCLUDE_DIRS ${CMAKE_CURRENT_LIST_DIR})
 
-add_subdirectory(LayoutReader)
+add_subdirectory(Libs)
