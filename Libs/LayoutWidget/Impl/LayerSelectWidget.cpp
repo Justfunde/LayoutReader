@@ -51,12 +51,14 @@ LayerSelectWidget::LayerSelectWidget(QWidget* t_parent)
 {
     QVBoxLayout* vbox = new QVBoxLayout(this);
 
+    vbox->addStretch();
+
     for (auto& [first, second] : paintData) {
-        CheckBox* checkBox = new CheckBox(first, "metal1", second.brushColor, second.brushStyle, this);
+        CheckBox* checkBox = new CheckBox(first, second.name, second.brushColor, second.brushStyle, this);
 
         connect(checkBox, &CheckBox::sendChecked, [this](uint16_t m_number, bool t_checked) { this->sendLayer(m_number, t_checked); });
 
-        vbox->addWidget(checkBox, 0, Qt::AlignLeft | Qt::AlignVCenter);
+        vbox->addWidget(checkBox, 0, Qt::AlignRight | Qt::AlignVCenter);
     }
 
     vbox->addStretch();
