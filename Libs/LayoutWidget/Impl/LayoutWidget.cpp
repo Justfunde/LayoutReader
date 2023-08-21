@@ -23,7 +23,7 @@ LayoutWidget::LayoutWidget(std::string_view& t_fileName, QWidget* t_parent)
     layerSelectWidget->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
 
     geometryWidget->setContentsMargins(0, 0, 0, 0);
-    layerSelectWidget->setContentsMargins(0, 0, 0, 0);
+    layerSelectWidget->setContentsMargins(0, 0, 0, 0); 
 
     hbox->addWidget(geometryWidget);
     hbox->addWidget(layerSelectWidget);

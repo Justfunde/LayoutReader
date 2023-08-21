@@ -56,7 +56,7 @@ private:
     void paintReference(lds::Reference* t_reference, QPainter* t_painter);
 
 public slots:
-    void updateLayer(const uint16_t& t_key);
+    void updateLayer(const uint16_t& t_key, const bool& t_isChecked);
 };
 
 #endif

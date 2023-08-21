@@ -42,14 +42,8 @@ CheckBox::CheckBox(uint16_t t_number, QString t_text, QColor t_brushColor, Qt::B
     hbox->setSpacing(10);
     hbox->setContentsMargins(0, 5, 0, 5);
 
-    connect(checkBox, QCheckBox::toggled, this, CheckBox::setChecked);
-
+    connect(checkBox, &QCheckBox::toggled, [this](bool t_checked) { this->sendChecked(this->m_number, t_checked); });
     setLayout(hbox);
-}
-
-void CheckBox::setChecked(const bool& t_isChecked)
-{
-    sendChecked(m_number);
 }
 
 LayerSelectWidget::LayerSelectWidget(QWidget* t_parent)
@@ -60,7 +54,7 @@ LayerSelectWidget::LayerSelectWidget(QWidget* t_parent)
     for (auto& [first, second] : paintData) {
         CheckBox* checkBox = new CheckBox(first, "metal1", second.brushColor, second.brushStyle, this);
 
-        connect(checkBox, CheckBox::sendChecked, this, LayerSelectWidget::changeLayer);
+        connect(checkBox, &CheckBox::sendChecked, [this](uint16_t m_number, bool t_checked) { this->sendLayer(m_number, t_checked); });
 
         vbox->addWidget(checkBox, 0, Qt::AlignLeft | Qt::AlignVCenter);
     }
@@ -68,9 +62,4 @@ LayerSelectWidget::LayerSelectWidget(QWidget* t_parent)
     vbox->addStretch();
 
     setLayout(vbox);
-}
-
-void LayerSelectWidget::changeLayer(const uint16_t& t_key)
-{
-    sendLayer(t_key);
 }

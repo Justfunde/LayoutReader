@@ -298,9 +298,9 @@ void GeometryWidget::paintReference(lds::Reference* t_reference, QPainter* t_pai
     }
 }
 
-void GeometryWidget::updateLayer(const uint16_t& t_key)
+void GeometryWidget::updateLayer(const uint16_t& t_key, const bool& t_isChecked)
 {
-    paintData.at(t_key).isActive = !paintData.at(t_key).isActive;
+    paintData.at(t_key).isActive = t_isChecked;
 
     update();
 }

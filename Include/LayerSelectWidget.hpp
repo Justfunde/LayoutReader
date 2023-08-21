@@ -29,9 +29,8 @@ public:
     CheckBox(uint16_t t_number, QString t_text, QColor t_brushColor, Qt::BrushStyle t_brushStyle, QWidget* t_parent = nullptr);
 
 public slots:
-    void setChecked(const bool& t_isChecked);
 signals:
-    void sendChecked(const uint16_t& t_key);
+    void sendChecked(const uint16_t& t_key, const bool& t_isChecked);
 };
 
 class LayerSelectWidget : public QWidget {
@@ -41,9 +40,8 @@ public:
     LayerSelectWidget(QWidget* t_parent = nullptr);
 
 public slots:
-    void changeLayer(const uint16_t& t_key);
 signals:
-    void sendLayer(const uint16_t& t_key);
+    void sendLayer(const uint16_t& t_key, const bool& t_isChecked);
 };
 
 #endif
