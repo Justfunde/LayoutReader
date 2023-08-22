@@ -6,5 +6,4 @@ file(GLOB_RECURSE READER_HEADER_LIST *.h *.hpp)
 message(DEBUG ${READER_HEADER_LIST} ${READER_SOURCE_LIST})
 
 add_library(${TARGET_NAME} STATIC ${READER_SOURCE_LIST} ${READER_HEADER_LIST})
-target_link_libraries(LayoutReader)
 target_include_directories(${TARGET_NAME} PUBLIC ${SHARED_INCLUDE_DIRS})

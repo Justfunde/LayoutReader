@@ -100,7 +100,7 @@ MskReader::GetElemName()//elementName == fileName
 
 bool 
 MskReader::Read(
-   LayoutData* layout)
+   lds::LayoutData* layout)
 {
    try {
       if (!layout) throw std::invalid_argument("Layout");
@@ -109,8 +109,8 @@ MskReader::Read(
       if (!file.is_open()) throw std::runtime_error("File was not opened");
       p_data = layout;
 
-      p_activeLibrary = new Library;
-      p_activeElement = new Element;
+      p_activeLibrary = new lds::Library;
+      p_activeElement = new lds::Element;
 
       p_data->fileName = this->fileName;
       p_activeElement->name = GetElemName();
@@ -131,7 +131,7 @@ MskReader::Read(
       p_data->libraries.push_back(p_activeLibrary);
 
       layout->fileName = fileName;
-      layout->fileFormat = LayoutFileFormat::MSK;
+      layout->fileFormat = lds::LayoutFileFormat::MSK;
 
       layout->libraries[0]->elements[0]->min = layout->libraries[0]->elements[0]->geometries[0]->min;
       layout->libraries[0]->elements[0]->max = layout->libraries[0]->elements[0]->geometries[0]->max;
@@ -153,7 +153,7 @@ MskReader::Read(
       if (file.is_open()) { file.close(); }
       if (layout)
       {
-         layout->fileFormat = LayoutFileFormat::undefined;
+         layout->fileFormat = lds::LayoutFileFormat::undefined;
          if (p_activeElement)
          {
             delete p_activeElement;
@@ -177,8 +177,8 @@ inline
 bool 
 MskReader::ParseRecLine(
    const std::string& Line,
-   Coord& LeftBot,
-   Coord& RightTop,
+   lds::Coord& LeftBot,
+   lds::Coord& RightTop,
    std::string& LayerName)
 {
    char layerNameCstr[8] = { '\0' };
@@ -196,12 +196,12 @@ MskReader::ParseRecLine(
 
 void 
 MskReader::FillBox(
-   Geometry* Box2Fill,
-   const Coord& LeftBot,
-   const Coord& RightTop,
+   lds::Geometry* Box2Fill,
+   const lds::Coord& LeftBot,
+   const lds::Coord& RightTop,
    LayerNum LNum)
 {
-    Coord currCoord;
+    lds::Coord currCoord;
     int32_t dx = CalcDelta(LeftBot.x, RightTop.x);
     int32_t dy = CalcDelta(LeftBot.y, RightTop.y);
 
@@ -248,10 +248,10 @@ void
 MskReader::ReadSectionRectangle(
    const std::string& FileLine)
 {
-   Geometry* currBox = new Rectangle;
+   lds::Geometry* currBox = new lds::Rectangle;
    try {
-      Coord leftBot;
-      Coord rightTop;
+      lds::Coord leftBot;
+      lds::Coord rightTop;
       std::string layerName;
       if (!ParseRecLine(FileLine, leftBot, rightTop, layerName)) {throw std::runtime_error("Coordinates was not read");}
 
@@ -260,9 +260,9 @@ MskReader::ReadSectionRectangle(
 
       FillBox(currBox, leftBot, rightTop, layerNum);
 
-      if (auto it = std::find_if(p_activeLibrary->layers.begin(), p_activeLibrary->layers.end(),[&](const Layer& val){ return layerNum == val.layer;}); p_activeLibrary->layers.end() == it )
+      if (auto it = std::find_if(p_activeLibrary->layers.begin(), p_activeLibrary->layers.end(),[&](const lds::Layer& val){ return layerNum == val.layer;}); p_activeLibrary->layers.end() == it )
       {
-         Layer tmpLayer;
+         lds::Layer tmpLayer;
          tmpLayer.layer = currBox->layer;
          tmpLayer.name = layerName;
          tmpLayer.geometries.push_back(currBox);
@@ -289,12 +289,12 @@ void
 MskReader::ReadSectionBoundingBox(
    const std::string& FileLine)
 {
-   Geometry* boundingBox = new Rectangle;
+   lds::Geometry* boundingBox = new lds::Rectangle;
    try {
-      Coord leftBot;
-      Coord rightTop;
+      lds::Coord leftBot;
+      lds::Coord rightTop;
       if (!sscanf(FileLine.c_str(), "BB(%d,%d,%d,%d)", &leftBot.x, &leftBot.y, &rightTop.x, &rightTop.y)) {throw std::runtime_error("Coordinates was not read");}
-      Layer boundingBoxLayer;
+      lds::Layer boundingBoxLayer;
       int16_t layerNum = g_layerMap.find("BB")->second;
       boundingBoxLayer.layer = layerNum;
       boundingBoxLayer.name = "BB";
@@ -319,12 +319,12 @@ void
 MskReader::ReadSectionTitle(
    const std::string& FileLine)
 {
-   Geometry* text = new Text;
-   Text* p_text = static_cast<Text*>(text);
+   lds::Geometry* text = new lds::Text;
+   lds::Text* p_text = static_cast<lds::Text*>(text);
    try
    {
       char buf[64] = { '\0' };
-      Coord leftBot;
+      lds::Coord leftBot;
 
       if (!sscanf(FileLine.c_str(), "TITLE %d %d  #%s", &leftBot.x, &leftBot.y, buf)) {throw std::runtime_error("Title was not read");}
 

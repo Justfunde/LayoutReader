@@ -19,9 +19,9 @@ using LayerNum = int16_t;
 class MskReader:public LayoutReader
 {
 private:
-	Library*			p_activeLibrary;
-	Element*			p_activeElement;
-	Geometry*      	 	p_active_geometry_item;
+	lds::Library*			p_activeLibrary;
+	lds::Element*			p_activeElement;
+	lds::Geometry*      	 	p_active_geometry_item;
 
 public:
 	MskReader() : p_activeLibrary(nullptr), p_activeElement(nullptr), p_active_geometry_item(nullptr) {}
@@ -33,7 +33,7 @@ public:
 
 	bool
 	Read(
-		LayoutData* layout) override final;
+		lds::LayoutData* layout) override final;
 
 
 	
@@ -84,8 +84,8 @@ private:
 	bool
 	ParseRecLine(
 		const std::string& Line,
-		Coord& LeftBot,
-		Coord& RightTop,
+		lds::Coord& LeftBot,
+		lds::Coord& RightTop,
 		std::string& LayerName);
 
 
@@ -99,9 +99,9 @@ private:
 	 */
 	void
 	FillBox(
-		Geometry* Box2Fill,
-		const Coord& RightTop,
-		const Coord& LeftBot,
+		lds::Geometry* Box2Fill,
+		const lds::Coord& RightTop,
+		const lds::Coord& LeftBot,
 		LayerNum LNum);
 
 
