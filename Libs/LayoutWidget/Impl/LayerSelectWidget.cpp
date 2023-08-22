@@ -2,15 +2,16 @@
 #include <QLabel>
 #include <QPainter>
 #include <QVBoxLayout>
+#include <QCheckBox>
 
 #include "Include/LayerSelectWidget.hpp"
 
-BrushIcon::BrushIcon(QColor t_brushColor, Qt::BrushStyle t_brushStyle, QWidget* t_parent)
+BrushIconWidget::BrushIconWidget(QColor t_brushColor, Qt::BrushStyle t_brushStyle, QWidget* t_parent)
     : brushColor(t_brushColor)
     , brushStyle(t_brushStyle)
     , QWidget(t_parent) {};
 
-void BrushIcon::paintEvent(QPaintEvent* t_event)
+void BrushIconWidget::paintEvent(QPaintEvent* t_event)
 {
     Q_UNUSED(t_event);
 
@@ -22,13 +23,13 @@ void BrushIcon::paintEvent(QPaintEvent* t_event)
     painter->end();
 }
 
-CheckBox::CheckBox(uint16_t t_number, QString t_text, QColor t_brushColor, Qt::BrushStyle t_brushStyle, QWidget* t_parent)
+LayerCheckWidget::LayerCheckWidget(uint16_t t_number, QString t_text, QColor t_brushColor, Qt::BrushStyle t_brushStyle, QWidget* t_parent)
     : m_number(t_number)
     , QWidget(t_parent)
 {
     QHBoxLayout* hbox = new QHBoxLayout(this);
     QCheckBox* checkBox = new QCheckBox("", this);
-    BrushIcon* brushIcon = new BrushIcon(t_brushColor, t_brushStyle, this);
+    BrushIconWidget* brushIcon = new BrushIconWidget(t_brushColor, t_brushStyle, this);
     QLabel* label = new QLabel(t_text, this);
 
     checkBox->setCheckable(Qt::Checked);
@@ -54,9 +55,9 @@ LayerSelectWidget::LayerSelectWidget(QWidget* t_parent)
     vbox->addStretch();
 
     for (auto& [first, second] : paintData) {
-        CheckBox* checkBox = new CheckBox(first, second.name, second.brushColor, second.brushStyle, this);
+        LayerCheckWidget* checkBox = new LayerCheckWidget(first, second.name, second.brushColor, second.brushStyle, this);
 
-        connect(checkBox, &CheckBox::sendChecked, [this](uint16_t m_number, bool t_checked) { this->sendLayer(m_number, t_checked); });
+        connect(checkBox, &LayerCheckWidget::sendChecked, [this](uint16_t m_number, bool t_checked) { this->sendLayer(m_number, t_checked); });
 
         vbox->addWidget(checkBox, 0, Qt::AlignRight | Qt::AlignVCenter);
     }
