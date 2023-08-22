@@ -1,3 +1,4 @@
+#include <QGuiApplication>
 #include <QPainter>
 #include <QTimeLine>
 #include <algorithm>
@@ -16,35 +17,35 @@ GeometryWidget::GeometryWidget(lds::LayoutData* t_layout, QWidget* t_parent)
     : QWidget(t_parent)
     , layout(t_layout)
 {
-    for (size_t i = 0; i < layout->libraries[0]->layers.size(); ++i) {
-        for (size_t j = 0; j < layout->libraries[0]->layers[i].geometries.size(); ++j) {
-            for (auto& coord : layout->libraries[0]->layers[i].geometries[j]->coords) {
-                min.x = std::min(coord.x, min.x);
-                min.y = std::min(coord.y, min.y);
-                max.x = std::max(coord.x, max.x);
-                max.y = std::max(coord.y, max.y);
-            }
-        }
-    }
-
-    if (min.x != 0 || min.y != 0) {
-        for (size_t i = 0; i < layout->libraries[0]->layers.size(); ++i) {
-            for (size_t j = 0; j < layout->libraries[0]->layers[i].geometries.size(); ++j) {
-                for (auto& coord : layout->libraries[0]->layers[i].geometries[j]->coords) {
-                    coord.x = (coord.x - min.x - (max.x - min.x) / 2.0);
-                    coord.y = (coord.y - min.y - (max.y - min.y) / 2.0);
+    if (layout->libraries.size() != 0) {
+        for (auto& layer : layout->libraries[0]->layers) {
+            for (auto& geom : layer.geometries) {
+                for (auto& coord : geom->coords) {
+                    min.x = std::min(coord.x, min.x);
+                    min.y = std::min(coord.y, min.y);
+                    max.x = std::max(coord.x, max.x);
+                    max.y = std::max(coord.y, max.y);
                 }
             }
         }
+
+        if (min.x != 0 || min.y != 0) {
+            for (auto& layer : layout->libraries[0]->layers) {
+                for (auto& geom : layer.geometries) {
+                    for (auto& coord : geom->coords) {
+                        coord.x = (coord.x - min.x - (max.x - min.x) / 2.0);
+                        coord.y = (coord.y - min.y - (max.y - min.y) / 2.0);
+                    }
+                }
+            }
+        }
+
+        std::sort(layout->libraries[0]->layers.begin(), layout->libraries[0]->layers.end(), [](const lds::Layer& t_l1, const lds::Layer& t_l2) {
+            return t_l1.layer < t_l2.layer;
+        });
     }
 
-    std::sort(layout->libraries[0]->layers.begin(), layout->libraries[0]->layers.end(), [](const lds::Layer& t_l1, const lds::Layer& t_l2) {
-        return t_l1.layer < t_l2.layer;
-    });
-
-    rescaleToSize();
-
-    QPalette pal = QPalette();
+    QPalette pal;
     pal.setColor(QPalette::Window, QColor(16, 16, 16));
     setAutoFillBackground(true);
     setPalette(pal);
@@ -114,14 +115,19 @@ void GeometryWidget::resizeEvent(QResizeEvent* t_event)
 {
     Q_UNUSED(t_event);
 
-    rescaleToSize();
+    double newInitial = std::min((width() * __BORDERS__) / (max.x - min.x), (height() * __BORDERS__) / (max.y - min.y));
+
+    m_scale.current = m_scale.current / m_scale.initial * newInitial;
+    m_scale.initial = newInitial;
 }
 
 void GeometryWidget::wheelEvent(QWheelEvent* t_event)
 {
-    m_scale.current += m_scale.current * 0.1 * (t_event->angleDelta().y() > 0 ? 1 : -1);
+    if (QGuiApplication::queryKeyboardModifiers().testFlag(Qt::ControlModifier)) {
+        m_scale.current += m_scale.current * 0.1 * (t_event->angleDelta().y() > 0 ? 1 : -1);
 
-    update();
+        update();
+    }
 }
 
 void GeometryWidget::mousePressEvent(QMouseEvent* t_event)
@@ -151,14 +157,6 @@ void GeometryWidget::mouseReleaseEvent(QMouseEvent* event)
     QCursor changedCursor = cursor();
     changedCursor.setShape(Qt::ArrowCursor);
     setCursor(changedCursor);
-}
-
-void GeometryWidget::rescaleToSize()
-{
-    double newInitial = std::min((width() * __BORDERS__) / (max.x - min.x), (height() * __BORDERS__) / (max.y - min.y));
-
-    m_scale.current = m_scale.current / m_scale.initial * newInitial;
-    m_scale.initial = newInitial;
 }
 
 void GeometryWidget::paintGrid(QPainter* t_painter)

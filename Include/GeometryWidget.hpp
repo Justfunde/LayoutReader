@@ -48,7 +48,6 @@ protected:
     void mouseReleaseEvent(QMouseEvent* event);
 
 private:
-    void rescaleToSize();
     void paintGrid(QPainter* t_painter);
     void paintPath(lds::Path* t_path, QPainter* t_painter);
     void paintPolygon(lds::Polygon* t_polygon, QPainter* t_painter);
