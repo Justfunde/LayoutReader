@@ -8,7 +8,7 @@ class LayoutWidget : public QWidget {
     Q_OBJECT
 
 public:
-    LayoutWidget(std::string_view& t_fileName, QWidget* t_parent = nullptr);
+    LayoutWidget(std::string_view t_fileName, QWidget* t_parent = nullptr);
 };
 
 #endif

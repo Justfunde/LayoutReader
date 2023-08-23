@@ -5,7 +5,7 @@
 #include "Include/LayoutReader.hpp"
 #include "Include/LayoutWidget.hpp"
 
-LayoutWidget::LayoutWidget(std::string_view& t_fileName, QWidget* t_parent)
+LayoutWidget::LayoutWidget(std::string_view t_fileName, QWidget* t_parent)
     : QWidget(t_parent)
 {
     lds::LayoutData* layout = new lds::LayoutData();
@@ -17,13 +17,13 @@ LayoutWidget::LayoutWidget(std::string_view& t_fileName, QWidget* t_parent)
     GeometryWidget* geometryWidget = new GeometryWidget(layout, this);
     LayerSelectWidget* layerSelectWidget = new LayerSelectWidget(this);
 
-    connect(layerSelectWidget, LayerSelectWidget::sendLayer, geometryWidget, GeometryWidget::updateLayer);
+    connect(layerSelectWidget, &LayerSelectWidget::sendLayer, geometryWidget, &GeometryWidget::updateLayer);
 
     geometryWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     layerSelectWidget->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
 
     geometryWidget->setContentsMargins(0, 0, 0, 0);
-    layerSelectWidget->setContentsMargins(0, 0, 0, 0); 
+    layerSelectWidget->setContentsMargins(0, 0, 0, 0);
 
     hbox->addWidget(geometryWidget);
     hbox->addWidget(layerSelectWidget);

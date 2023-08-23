@@ -12,18 +12,19 @@
 
 /**
  * @brief Handle scale data for topology
- * 
+ *
  */
 struct Scale {
     uint32_t initialW {}; // original with of topology
     uint32_t initialH {}; // original height of topology
     double initial { 1.0 }; // inital scaling -> set after each resize
     double current { 1.0 }; // current scaling -> changes after zoom in/out
+    double scrool {};
 };
 
 /**
  * @brief Handle mouse data
- * 
+ *
  */
 struct Mouse {
     QPoint triggerPos {}; // Position of mouse in trigger(press) moment;
@@ -31,7 +32,7 @@ struct Mouse {
 
 /**
  * @brief Handle axes data
- * 
+ *
  */
 struct Axes {
     QPoint pos {}; // current position of axes
@@ -40,7 +41,7 @@ struct Axes {
 
 /**
  * @brief Paint all geometry in topology...
- * 
+ *
  */
 class GeometryWidget : public QWidget {
     Q_OBJECT

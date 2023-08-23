@@ -3,12 +3,13 @@
 #include <QTimeLine>
 #include <algorithm>
 #include <iostream>
+#include <math.h>
 #include <vector>
 
 #include "Include/GeometryWidget.hpp"
 
 #define __PIXEL_SIZE__ 20
-#define __BORDERS__ 0.8
+#define __BORDERS__ 0.95
 #define __MOVE_FACTOR__ 0.35
 #define __GRID_SMALL_STEP__ 1
 #define __GRID_BIG_STEP__ 10
@@ -124,7 +125,12 @@ void GeometryWidget::resizeEvent(QResizeEvent* t_event)
 void GeometryWidget::wheelEvent(QWheelEvent* t_event)
 {
     if (QGuiApplication::queryKeyboardModifiers().testFlag(Qt::ControlModifier)) {
-        m_scale.current += m_scale.current * 0.1 * (t_event->angleDelta().y() > 0 ? 1 : -1);
+        double sigmoid = 1.0 / (1 + std::pow(2.718281282846, -1 * m_scale.scrool));
+
+        if ((sigmoid > 0.5 || t_event->angleDelta().y() > 0) && (sigmoid < 0.995 || t_event->angleDelta().y() < 0)) {
+            m_scale.scrool += 0.1 * (t_event->angleDelta().y() > 0 ? 1 : -1);
+            m_scale.current = m_scale.initial / (1.0 / (std::pow(2.718281282846, 1 * m_scale.scrool)));
+        }
 
         update();
     }
