@@ -19,7 +19,7 @@ struct Scale {
     uint32_t initialH {}; // original height of topology
     double initial { 1.0 }; // inital scaling -> set after each resize
     double current { 1.0 }; // current scaling -> changes after zoom in/out
-    double scrool {};
+    double scroll {};
 };
 
 /**
@@ -54,7 +54,7 @@ class GeometryWidget : public QWidget {
     Axes m_axes {};
 
 public:
-    GeometryWidget(lds::LayoutData* t_layout, QWidget* t_parent = nullptr);
+    GeometryWidget(QWidget* t_parent = nullptr);
 
 protected:
     void paintEvent(QPaintEvent* t_event);
@@ -112,6 +112,8 @@ public slots:
      * @param t_isChecked checked state
      */
     void updateLayer(const uint16_t& t_key, const bool& t_isChecked);
+
+    void setLayout(lds::LayoutData* t_layout);
 };
 
 #endif

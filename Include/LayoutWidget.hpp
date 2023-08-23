@@ -8,7 +8,11 @@ class LayoutWidget : public QWidget {
     Q_OBJECT
 
 public:
-    LayoutWidget(std::string_view t_fileName, QWidget* t_parent = nullptr);
+    LayoutWidget(QWidget* t_parent = nullptr);
+
+public slots:
+signals:
+    void setFile(std::string_view t_fileName);
 };
 
 #endif

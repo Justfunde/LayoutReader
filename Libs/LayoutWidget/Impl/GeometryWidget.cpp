@@ -14,10 +14,37 @@
 #define __GRID_SMALL_STEP__ 1
 #define __GRID_BIG_STEP__ 10
 
-GeometryWidget::GeometryWidget(lds::LayoutData* t_layout, QWidget* t_parent)
+GeometryWidget::GeometryWidget(QWidget* t_parent)
     : QWidget(t_parent)
-    , layout(t_layout)
 {
+    QPalette pal;
+    pal.setColor(QPalette::Window, QColor(16, 16, 16));
+    setAutoFillBackground(true);
+    setPalette(pal);
+};
+
+void GeometryWidget::setLayout(lds::LayoutData* t_layout)
+{
+    if (layout != nullptr) {
+        min = { std::numeric_limits<int32_t>::max(), std::numeric_limits<int32_t>::max() };
+        max = { 0, 0 };
+
+        m_scale.current = 1.0;
+        m_scale.initial = 1.0;
+        m_scale.scroll = 0.0;
+
+        m_axes.pos = { 0, 0 };
+        m_axes.moveIn = { 0, 0 };
+
+        m_mouse.triggerPos = { 0, 0 };
+
+        for (auto& [first, second] : paintData) {
+            second.isActive = true;
+        }
+    }
+
+    layout = t_layout;
+
     if (layout->libraries.size() != 0) {
         for (auto& layer : layout->libraries[0]->layers) {
             for (auto& geom : layer.geometries) {
@@ -46,11 +73,13 @@ GeometryWidget::GeometryWidget(lds::LayoutData* t_layout, QWidget* t_parent)
         });
     }
 
-    QPalette pal;
-    pal.setColor(QPalette::Window, QColor(16, 16, 16));
-    setAutoFillBackground(true);
-    setPalette(pal);
-};
+    double newInitial = std::min((width() * __BORDERS__) / (max.x - min.x), (height() * __BORDERS__) / (max.y - min.y));
+
+    m_scale.current = m_scale.current / m_scale.initial * newInitial;
+    m_scale.initial = newInitial;
+
+    update();
+}
 
 void GeometryWidget::paintEvent(QPaintEvent* t_event)
 {
@@ -116,20 +145,22 @@ void GeometryWidget::resizeEvent(QResizeEvent* t_event)
 {
     Q_UNUSED(t_event);
 
-    double newInitial = std::min((width() * __BORDERS__) / (max.x - min.x), (height() * __BORDERS__) / (max.y - min.y));
+    if (layout != nullptr) {
+        double newInitial = std::min((width() * __BORDERS__) / (max.x - min.x), (height() * __BORDERS__) / (max.y - min.y));
 
-    m_scale.current = m_scale.current / m_scale.initial * newInitial;
-    m_scale.initial = newInitial;
+        m_scale.current = m_scale.current / m_scale.initial * newInitial;
+        m_scale.initial = newInitial;
+    }
 }
 
 void GeometryWidget::wheelEvent(QWheelEvent* t_event)
 {
     if (QGuiApplication::queryKeyboardModifiers().testFlag(Qt::ControlModifier)) {
-        double sigmoid = 1.0 / (1 + std::pow(2.718281282846, -1 * m_scale.scrool));
+        double sigmoid = 1.0 / (1 + std::pow(2.718281282846, -1 * m_scale.scroll));
 
         if ((sigmoid > 0.5 || t_event->angleDelta().y() > 0) && (sigmoid < 0.995 || t_event->angleDelta().y() < 0)) {
-            m_scale.scrool += 0.1 * (t_event->angleDelta().y() > 0 ? 1 : -1);
-            m_scale.current = m_scale.initial / (1.0 / (std::pow(2.718281282846, 1 * m_scale.scrool)));
+            m_scale.scroll += 0.1 * (t_event->angleDelta().y() > 0 ? 1 : -1);
+            m_scale.current = m_scale.initial / (1.0 / (std::pow(2.718281282846, 1 * m_scale.scroll)));
         }
 
         update();
